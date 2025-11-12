@@ -12,70 +12,75 @@
     <p class="muted">Découpez des segments vidéo sans ré-encodage (ffmpeg). Raccourcis : <kbd>Espace</kbd> Play/Pause, <kbd>I</kbd> In, <kbd>O</kbd> Out, <kbd>⏎</kbd> Ajouter, <kbd>←/→</kbd> ±0.5s, <kbd>Shift+←/→</kbd> ±5s.</p>
   </header>
 
-  <section class="picker">
-    <div class="card">
-      <h2>1) Sélection du fichier</h2>
-      <div class="row">
-        <label>Prévisualisation locale (facultative) :</label>
-        <input type="file" id="fileLocal" accept="video/*" />
-      </div>
-
-      <div class="row">
-        <label>Chemin absolu pour découpe (vrai fichier disque) :</label>
-        <input type="text" id="absPath" placeholder="/Volumes/NO NAME/DCIM/113GOPRO/GOPR1649.MP4" />
-        <button id="browseBtn">Parcourir…</button>
-      </div>
-
-      <div id="browser" class="browser hidden">
-        <div class="browser-head">
-          <strong>Explorateur</strong>
-          <button id="browserClose">Fermer</button>
+  <!-- NOUVEAU : layout 2 colonnes (gauche = vidéo, droite = reste) -->
+  <div class="layout">
+    <section class="player">
+      <div class="card">
+        <h2>2) Lecteur</h2>
+        <video id="player" controls preload="metadata"></video>
+        <div class="controls">
+          <button id="markIn">Marquer In (I)</button>
+          <button id="markOut">Marquer Out (O)</button>
+          <span id="inOutDisplay" class="muted">In: — | Out: —</span>
         </div>
-        <div class="browser-path"><span id="cwdLabel"></span></div>
-        <div id="entries" class="entries"></div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="player">
-    <div class="card">
-      <h2>2) Lecteur</h2>
-      <video id="player" controls preload="metadata"></video>
-      <div class="controls">
-        <button id="markIn">Marquer In (I)</button>
-        <button id="markOut">Marquer Out (O)</button>
-        <span id="inOutDisplay" class="muted">In: — | Out: —</span>
-      </div>
-    </div>
-  </section>
+    <div class="side">
+      <section class="picker">
+        <div class="card">
+          <h2>1) Sélection du fichier</h2>
+          <div class="row">
+            <label>Prévisualisation locale (facultative) :</label>
+            <input type="file" id="fileLocal" accept="video/*" />
+          </div>
 
-  <section class="segments">
-    <div class="card">
-      <h2>3) Segments</h2>
-      <div class="controls">
-        <button id="addSegment">➕ Ajouter (Entrée)</button>
-        <button id="clearSegments">🗑️ Vider</button>
-      </div>
-      <table id="segmentsTable">
-        <thead><tr><th>#</th><th>Début</th><th>Fin</th><th>Actions</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </section>
+          <div class="row">
+            <label>Chemin absolu pour découpe (vrai fichier disque) :</label>
+            <input type="text" id="absPath" placeholder="/Volumes/NO NAME/DCIM/113GOPRO/GOPR1649.MP4" />
+            <button id="browseBtn">Parcourir…</button>
+          </div>
 
-  <section class="cut">
-    <div class="card">
-      <h2>4) Découper</h2>
-      <label class="check">
-        <input type="checkbox" id="trashOriginal" />
-        Mettre la vidéo d’origine à la corbeille après découpe
-      </label>
-      <div class="controls">
-        <button id="cutButton" class="primary">🎬 Découper</button>
-      </div>
-      <div id="cutOutput" class="output"></div>
+          <div id="browser" class="browser hidden">
+            <div class="browser-head">
+              <strong>Explorateur</strong>
+              <button id="browserClose">Fermer</button>
+            </div>
+            <div class="browser-path"><span id="cwdLabel"></span></div>
+            <div id="entries" class="entries"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="segments">
+        <div class="card">
+          <h2>3) Segments</h2>
+          <div class="controls">
+            <button id="addSegment">➕ Ajouter (Entrée)</button>
+            <button id="clearSegments">🗑️ Vider</button>
+          </div>
+          <table id="segmentsTable">
+            <thead><tr><th>#</th><th>Début</th><th>Fin</th><th>Actions</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="cut">
+        <div class="card">
+          <h2>4) Découper</h2>
+          <label class="check">
+            <input type="checkbox" id="trashOriginal" />
+            Mettre la vidéo d’origine à la corbeille après découpe
+          </label>
+          <div class="controls">
+            <button id="cutButton" class="primary">🎬 Découper</button>
+          </div>
+          <div id="cutOutput" class="output"></div>
+        </div>
+      </section>
     </div>
-  </section>
+  </div>
 
   <footer>
     <p class="muted">QuickCut CLI • ffmpeg • fonctionne en local • aucun upload</p>
