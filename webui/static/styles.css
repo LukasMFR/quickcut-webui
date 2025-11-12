@@ -209,7 +209,6 @@ td input {
 
 /* Colonne vidéo : la carte occupe toute la hauteur, vidéo en haut, contrôles en bas */
 .player .card {
-  height: 100%;
   display: flex;
   flex-direction: column;
 }
