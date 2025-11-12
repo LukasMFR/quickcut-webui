@@ -28,7 +28,35 @@ const tbody = $("#segmentsTable tbody");
 const output = $("#cutOutput");
 const trashOriginal = $("#trashOriginal");
 
-// ==== Finder natif (AppleScript côté serveur) + prévisualisation via /api/stream ====
+// ===== Preview helper (stream local avec prise en charge des Range) =====
+async function setPreviewForPath(path) {
+  try { player.pause(); } catch { }
+  // reset propre
+  player.removeAttribute("src");
+  player.load();
+
+  const url = `/api/stream?path=${encodeURIComponent(path)}`;
+  player.src = url;
+
+  // force le parsing des métadonnées pour que currentTime/seek soient utilisables
+  const onMeta = () => {
+    player.removeEventListener("loadedmetadata", onMeta);
+    try { player.currentTime = 0; } catch { }
+  };
+  const onErr = () => {
+    player.removeEventListener("error", onErr);
+    if (output) {
+      output.textContent = "⚠️ Impossible de prévisualiser la vidéo. Vérifie que /api/stream est bien implémenté et que le chemin est accessible.";
+    }
+  };
+  player.addEventListener("loadedmetadata", onMeta, { once: true });
+  player.addEventListener("error", onErr, { once: true });
+
+  player.load();
+  player.play().catch(() => { });
+}
+
+// ==== Finder natif (AppleScript côté serveur) + prévisualisation ====
 $("#browseBtn").addEventListener("click", async () => {
   try {
     const resp = await fetch("/api/choose-file");
@@ -40,12 +68,22 @@ $("#browseBtn").addEventListener("click", async () => {
     }
     const path = data.path;
     absPath.value = path;
-
-    // Prévisualisation via streaming local (support Range)
-    player.src = `/api/stream?path=${encodeURIComponent(path)}`;
-    player.play().catch(() => { });
+    await setPreviewForPath(path); // ✅ preview auto
   } catch (e) {
     alert("Erreur lors de l’ouverture du Finder.");
+  }
+});
+
+// ✅ si l’utilisateur colle/tape un chemin, on prévisualise aussi
+absPath.addEventListener("change", () => {
+  const p = absPath.value.trim();
+  if (p) setPreviewForPath(p);
+});
+absPath.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    const p = absPath.value.trim();
+    if (p) setPreviewForPath(p);
   }
 });
 
