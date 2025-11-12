@@ -13,6 +13,11 @@
   --input-fg: #111418;
   --table-alt: #f3f5f8;
   --overlay: rgba(0,0,0,0.4);
+
+  /* NOUVEAU : ratios colonne gauche/droite (modifiable) */
+  --left-col: 72%;
+  --right-col: 28%;
+  --gap: 16px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -43,6 +48,7 @@ body {
 header, footer { padding: 24px; text-align: center; }
 h1, h2 { margin: 0 0 12px; }
 
+/* Cards/sections (héritage) */
 section { padding: 12px 24px; max-width: 1100px; margin: 0 auto; }
 .card {
   background: var(--card); border: 1px solid var(--border); border-radius: 12px;
@@ -84,35 +90,50 @@ td input {
   border:1px solid var(--border); border-radius:8px; padding:12px; margin-top:10px;
 }
 
-/* === Layout deux colonnes (vidéo plus grande) === */
+/* === NOUVEAU : Layout plein écran à pourcentages === */
 .layout {
-  max-width: 1600px; /* +large pour que la vidéo prenne bien de la place */
+  width: 96vw;              /* large, quasi plein écran */
   margin: 0 auto;
   padding: 12px 24px;
   display: grid;
-  grid-template-columns: minmax(760px, 2fr) minmax(420px, 560px);
-  gap: 16px;
+  /* Vidéo très large à gauche, panneau à droite (pourcentages) */
+  grid-template-columns: minmax(0, var(--left-col)) minmax(320px, var(--right-col));
+  gap: var(--gap);
   align-items: start;
 }
 
-/* On neutralise le padding de section à l’intérieur du layout */
+/* On neutralise le padding/width interne des sections dans la grille */
 .layout section { padding: 0; max-width: none; }
 
-/* Vidéo collée en haut et bien visible au scroll */
+/* Vidéo toujours bien visible */
 .player .card { position: sticky; top: 16px; }
 
 /* Modal explorateur */
-.browser { position: fixed; inset: 40px; background: var(--bg); border:1px solid var(--border); border-radius:12px; display:flex; flex-direction:column; box-shadow: 0 10px 40px var(--overlay); }
+.browser {
+  position: fixed; inset: 40px; background: var(--bg);
+  border:1px solid var(--border); border-radius:12px;
+  display:flex; flex-direction:column; box-shadow: 0 10px 40px var(--overlay);
+}
 .browser.hidden { display:none; }
-.browser-head { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-bottom:1px solid var(--border); background: color-mix(in oklab, var(--card), var(--fg) 6%); }
+.browser-head {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:10px 12px; border-bottom:1px solid var(--border);
+  background: color-mix(in oklab, var(--card), var(--fg) 6%);
+}
 .browser-path { padding:10px 12px; color:var(--muted); border-bottom:1px solid var(--border); }
-.entries { padding:8px 12px; overflow:auto; flex:1; display:grid; grid-template-columns: repeat(auto-fill,minmax(260px,1fr)); gap:8px; }
-.entry { border:1px solid var(--border); border-radius:8px; padding:10px; background: color-mix(in oklab, var(--card), var(--fg) 4%); cursor:pointer; }
+.entries {
+  padding:8px 12px; overflow:auto; flex:1;
+  display:grid; grid-template-columns: repeat(auto-fill,minmax(260px,1fr)); gap:8px;
+}
+.entry {
+  border:1px solid var(--border); border-radius:8px; padding:10px;
+  background: color-mix(in oklab, var(--card), var(--fg) 4%); cursor:pointer;
+}
 .entry:hover { border-color: var(--accent); }
 .entry .type { font-size:12px; color:var(--muted); }
 
-/* Fallback si écran étroit : on empile */
+/* Fallback mobile/étroit : on empile les colonnes */
 @media (max-width: 1100px) {
-  .layout { grid-template-columns: 1fr; }
+  .layout { grid-template-columns: 1fr; width: 100vw; padding: 12px; }
   .player .card { position: static; }
 }
