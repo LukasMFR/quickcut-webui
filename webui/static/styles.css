@@ -224,7 +224,6 @@ td input {
 
 .rightpanel .card {
   display: grid;
-  grid-template-rows: 1fr 1fr 1fr;
   /* 3 zones égales */
   gap: 16px;
   overflow: hidden;
