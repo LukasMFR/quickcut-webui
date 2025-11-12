@@ -223,7 +223,6 @@ td input {
 }
 
 .rightpanel .card {
-  height: 100%;
   display: grid;
   grid-template-rows: 1fr 1fr 1fr;
   /* 3 zones égales */
