@@ -1,0 +1,51 @@
+:root {
+  --bg: #0f1115;
+  --fg: #e6e6e6;
+  --muted: #9aa3af;
+  --card: #141820;
+  --accent: #4f7cff;
+  --accent-2: #24d390;
+  --border: #222834;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  background: var(--bg); color: var(--fg);
+}
+header, footer { padding: 24px; text-align: center; }
+h1, h2 { margin: 0 0 12px; }
+section { padding: 12px 24px; max-width: 1100px; margin: 0 auto; }
+.card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 16px; margin-bottom: 18px;
+}
+.row { display: flex; gap: 8px; align-items: center; margin: 8px 0; flex-wrap: wrap; }
+label { color: var(--muted); min-width: 280px; }
+input[type="text"] { flex: 1; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: #0e121a; color: var(--fg); }
+input[type="file"] { color: var(--fg); }
+button {
+  background: #1a2130; color: var(--fg); border: 1px solid var(--border); padding: 10px 14px;
+  border-radius: 8px; cursor: pointer;
+}
+button.primary { background: var(--accent); border-color: var(--accent); }
+button:hover { filter: brightness(1.1); }
+.muted { color: var(--muted); }
+video { width: 100%; border-radius: 8px; background: #000; }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 8px; border-bottom: 1px solid var(--border); }
+td input { width: 120px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); background:#0e121a; color: var(--fg); }
+
+.check { display: flex; gap: 10px; align-items: center; margin: 8px 0 16px; }
+
+.output { white-space: pre-wrap; background:#0e121a; border:1px solid var(--border); border-radius:8px; padding:12px; margin-top:10px; }
+
+.browser { position: fixed; inset: 40px; background: var(--bg); border:1px solid var(--border); border-radius:12px; display:flex; flex-direction:column; }
+.browser.hidden { display:none; }
+.browser-head { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-bottom:1px solid var(--border); background:#10141c; }
+.browser-path { padding:10px 12px; color:var(--muted); border-bottom:1px solid var(--border); }
+.entries { padding:8px 12px; overflow:auto; flex:1; display:grid; grid-template-columns: repeat(auto-fill,minmax(260px,1fr)); gap:8px; }
+.entry { border:1px solid var(--border); border-radius:8px; padding:10px; background:#10141c; cursor:pointer; }
+.entry:hover { border-color: var(--accent); }
+.entry .type { font-size:12px; color:var(--muted); }
