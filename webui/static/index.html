@@ -27,56 +27,62 @@
     </section>
 
     <section class="rightpanel">
-      <div class="card">
-        <!-- 1) Sélection du fichier -->
-        <h2>1) Sélection du fichier</h2>
-        <div class="row">
-          <label>Prévisualisation locale (facultative) :</label>
-          <input type="file" id="fileLocal" accept="video/*" />
-        </div>
+  <div class="card">
 
-        <div class="row">
-          <label>Chemin absolu pour découpe (vrai fichier disque) :</label>
-          <input type="text" id="absPath" placeholder="/Volumes/NO NAME/DCIM/113GOPRO/GOPR1649.MP4" />
-          <button id="browseBtn">Parcourir…</button>
-        </div>
-
-        <div id="browser" class="browser hidden">
-          <div class="browser-head">
-            <strong>Explorateur</strong>
-            <button id="browserClose">Fermer</button>
-          </div>
-          <div class="browser-path"><span id="cwdLabel"></span></div>
-          <div id="entries" class="entries"></div>
-        </div>
-
-        <hr class="sep" />
-
-        <!-- 3) Segments -->
-        <h2>3) Segments</h2>
-        <div class="controls">
-          <button id="addSegment">➕ Ajouter (Entrée)</button>
-          <button id="clearSegments">🗑️ Vider</button>
-        </div>
-        <table id="segmentsTable">
-          <thead><tr><th>#</th><th>Début</th><th>Fin</th><th>Actions</th></tr></thead>
-          <tbody></tbody>
-        </table>
-
-        <hr class="sep" />
-
-        <!-- 4) Découper -->
-        <h2>4) Découper</h2>
-        <label class="check">
-          <input type="checkbox" id="trashOriginal" />
-          Mettre la vidéo d’origine à la corbeille après découpe
-        </label>
-        <div class="controls">
-          <button id="cutButton" class="primary">🎬 Découper</button>
-        </div>
-        <div id="cutOutput" class="output"></div>
+    <div class="rp-block">
+      <!-- 1) Sélection du fichier -->
+      <h2>1) Sélection du fichier</h2>
+      <div class="row">
+        <label>Prévisualisation locale (facultative) :</label>
+        <input type="file" id="fileLocal" accept="video/*" />
       </div>
-    </section>
+
+      <div class="row">
+        <label>Chemin absolu pour découpe (vrai fichier disque) :</label>
+        <input type="text" id="absPath" placeholder="/Volumes/NO NAME/DCIM/113GOPRO/GOPR1649.MP4" />
+        <button id="browseBtn">Parcourir…</button>
+      </div>
+
+      <div id="browser" class="browser hidden">
+        <div class="browser-head">
+          <strong>Explorateur</strong>
+          <button id="browserClose">Fermer</button>
+        </div>
+        <div class="browser-path"><span id="cwdLabel"></span></div>
+        <div id="entries" class="entries"></div>
+      </div>
+    </div>
+
+    <div class="rp-block">
+      <!-- 3) Segments -->
+      <h2>3) Segments</h2>
+      <div class="controls">
+        <button id="addSegment">➕ Ajouter (Entrée)</button>
+        <button id="clearSegments">🗑️ Vider</button>
+      </div>
+      <table id="segmentsTable">
+        <thead>
+          <tr><th>#</th><th>Début</th><th>Fin</th><th>Actions</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="rp-block">
+      <!-- 4) Découper -->
+      <h2>4) Découper</h2>
+      <label class="check">
+        <input type="checkbox" id="trashOriginal" />
+        Mettre la vidéo d’origine à la corbeille après découpe
+      </label>
+      <div class="controls">
+        <button id="cutButton" class="primary">🎬 Découper</button>
+      </div>
+      <div id="cutOutput" class="output"></div>
+    </div>
+
+  </div>
+</section>
   </div>
 
   <footer>
