@@ -1,94 +1,105 @@
 <!doctype html>
 <html lang="fr">
+
 <head>
-  <meta charset="utf-8" />
-  <title>QuickCut WebUI</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="/static/styles.css" />
+    <meta charset="utf-8" />
+    <title>QuickCut WebUI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/static/styles.css" />
 </head>
+
 <body>
-  <header>
-    <h1>🎬 QuickCut WebUI</h1>
-    <p class="muted">Découpez des segments vidéo sans ré-encodage (ffmpeg). Raccourcis : <kbd>Espace</kbd> Play/Pause, <kbd>I</kbd> In, <kbd>O</kbd> Out, <kbd>⏎</kbd> Ajouter, <kbd>←/→</kbd> ±0.5s, <kbd>Shift+←/→</kbd> ±5s.</p>
-  </header>
+    <header>
+        <h1>🎬 QuickCut WebUI</h1>
+        <p class="muted">Découpez des segments vidéo sans ré-encodage (ffmpeg). Raccourcis : <kbd>Espace</kbd>
+            Play/Pause, <kbd>I</kbd> In, <kbd>O</kbd> Out, <kbd>⏎</kbd> Ajouter, <kbd>←/→</kbd> ±0.5s,
+            <kbd>Shift+←/→</kbd> ±5s.
+        </p>
+    </header>
 
-  <!-- Layout 2 colonnes : gauche (vidéo large), droite (tout le reste dans UNE box) -->
-  <div class="layout">
-    <section class="player">
-      <div class="card">
-        <h2>2) Lecteur</h2>
-        <video id="player" controls preload="metadata"></video>
-        <div class="controls">
-          <button id="markIn">Marquer In (I)</button>
-          <button id="markOut">Marquer Out (O)</button>
-          <span id="inOutDisplay" class="muted">In: — | Out: —</span>
-        </div>
-      </div>
-    </section>
+    <!-- Layout 2 colonnes : gauche (vidéo large), droite (tout le reste dans UNE box) -->
+    <div class="layout">
+        <section class="player">
+            <div class="card">
+                <h2>2) Lecteur</h2>
+                <video id="player" controls preload="metadata"></video>
+                <div class="controls">
+                    <button id="markIn">Marquer In (I)</button>
+                    <button id="markOut">Marquer Out (O)</button>
+                    <span id="inOutDisplay" class="muted">In: — | Out: —</span>
+                </div>
+            </div>
+        </section>
 
-    <section class="rightpanel">
-  <div class="card">
+        <section class="rightpanel">
+            <div class="card">
 
-    <div class="rp-block">
-      <!-- 1) Sélection du fichier -->
-      <h2>1) Sélection du fichier</h2>
-      <div class="row">
-        <label>Prévisualisation locale (facultative) :</label>
-        <input type="file" id="fileLocal" accept="video/*" />
-      </div>
+                <div class="rp-block">
+                    <!-- 1) Sélection du fichier -->
+                    <h2>1) Sélection du fichier</h2>
+                    <div class="row">
+                        <label>Prévisualisation locale (facultative) :</label>
+                        <input type="file" id="fileLocal" accept="video/*" />
+                    </div>
 
-      <div class="row">
-        <label>Chemin absolu pour découpe (vrai fichier disque) :</label>
-        <input type="text" id="absPath" placeholder="/Volumes/NO NAME/DCIM/113GOPRO/GOPR1649.MP4" />
-        <button id="browseBtn">Parcourir…</button>
-      </div>
+                    <div class="row">
+                        <label>Chemin absolu pour découpe (vrai fichier disque) :</label>
+                        <input type="text" id="absPath" placeholder="/Volumes/NO NAME/DCIM/113GOPRO/GOPR1649.MP4" />
+                        <button id="browseBtn">Parcourir…</button>
+                    </div>
 
-      <div id="browser" class="browser hidden">
-        <div class="browser-head">
-          <strong>Explorateur</strong>
-          <button id="browserClose">Fermer</button>
-        </div>
-        <div class="browser-path"><span id="cwdLabel"></span></div>
-        <div id="entries" class="entries"></div>
-      </div>
+                    <div id="browser" class="browser hidden">
+                        <div class="browser-head">
+                            <strong>Explorateur</strong>
+                            <button id="browserClose">Fermer</button>
+                        </div>
+                        <div class="browser-path"><span id="cwdLabel"></span></div>
+                        <div id="entries" class="entries"></div>
+                    </div>
+                </div>
+
+                <div class="rp-block">
+                    <!-- 3) Segments -->
+                    <h2>3) Segments</h2>
+                    <div class="controls">
+                        <button id="addSegment">➕ Ajouter (Entrée)</button>
+                        <button id="clearSegments">🗑️ Vider</button>
+                    </div>
+                    <table id="segmentsTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Début</th>
+                                <th>Fin</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <div class="rp-block">
+                    <!-- 4) Découper -->
+                    <h2>4) Découper</h2>
+                    <label class="check">
+                        <input type="checkbox" id="trashOriginal" />
+                        Mettre la vidéo d’origine à la corbeille après découpe
+                    </label>
+                    <div class="controls">
+                        <button id="cutButton" class="primary">🎬 Découper</button>
+                    </div>
+                    <div id="cutOutput" class="output"></div>
+                </div>
+
+            </div>
+        </section>
     </div>
 
-    <div class="rp-block">
-      <!-- 3) Segments -->
-      <h2>3) Segments</h2>
-      <div class="controls">
-        <button id="addSegment">➕ Ajouter (Entrée)</button>
-        <button id="clearSegments">🗑️ Vider</button>
-      </div>
-      <table id="segmentsTable">
-        <thead>
-          <tr><th>#</th><th>Début</th><th>Fin</th><th>Actions</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+    <footer>
+        <p class="muted">QuickCut CLI • ffmpeg • fonctionne en local • aucun upload</p>
+    </footer>
 
-    <div class="rp-block">
-      <!-- 4) Découper -->
-      <h2>4) Découper</h2>
-      <label class="check">
-        <input type="checkbox" id="trashOriginal" />
-        Mettre la vidéo d’origine à la corbeille après découpe
-      </label>
-      <div class="controls">
-        <button id="cutButton" class="primary">🎬 Découper</button>
-      </div>
-      <div id="cutOutput" class="output"></div>
-    </div>
-
-  </div>
-</section>
-  </div>
-
-  <footer>
-    <p class="muted">QuickCut CLI • ffmpeg • fonctionne en local • aucun upload</p>
-  </footer>
-
-  <script src="/static/app.js"></script>
+    <script src="/static/app.js"></script>
 </body>
+
 </html>

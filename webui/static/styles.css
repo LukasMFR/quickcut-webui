@@ -12,7 +12,7 @@
   --input-bg: #ffffff;
   --input-fg: #111418;
   --table-alt: #f3f5f8;
-  --overlay: rgba(0,0,0,0.4);
+  --overlay: rgba(0, 0, 0, 0.4);
 
   /* Ratios colonne gauche/droite (modifiable) */
   --left-col: 72%;
@@ -33,12 +33,15 @@
     --input-bg: #0e121a;
     --input-fg: #e6e6e6;
     --table-alt: #161b24;
-    --overlay: rgba(0,0,0,0.55);
+    --overlay: rgba(0, 0, 0, 0.55);
   }
 }
 
 /* === Base === */
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
@@ -50,70 +53,159 @@ body {
   display: grid;
   grid-template-rows: auto 1fr auto;
 }
-header, footer { padding: 24px; text-align: center; }
-h1, h2 { margin: 0 0 12px; }
+
+header,
+footer {
+  padding: 24px;
+  text-align: center;
+}
+
+h1,
+h2 {
+  margin: 0 0 12px;
+}
 
 /* Cards/sections (héritage) */
-section { padding: 12px 24px; max-width: 1100px; margin: 0 auto; }
+section {
+  padding: 12px 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
 .card {
-  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-  padding: 16px; margin-bottom: 18px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 18px;
 }
-.row { display: flex; gap: 8px; align-items: center; margin: 8px 0; flex-wrap: wrap; }
-label { color: var(--muted); min-width: 280px; }
+
+.row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0;
+  flex-wrap: wrap;
+}
+
+label {
+  color: var(--muted);
+  min-width: 280px;
+}
+
 input[type="text"] {
-  flex: 1; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
-  background: var(--input-bg); color: var(--input-fg);
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--input-fg);
 }
-input[type="file"] { color: var(--fg); }
+
+input[type="file"] {
+  color: var(--fg);
+}
+
 button {
   background: color-mix(in oklab, var(--card), var(--fg) 8%);
-  color: var(--fg); border: 1px solid var(--border); padding: 10px 14px;
-  border-radius: 8px; cursor: pointer;
+  color: var(--fg);
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
 }
-button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-button:hover { filter: brightness(1.03); }
-.muted { color: var(--muted); }
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+button:hover {
+  filter: brightness(1.03);
+}
+
+.muted {
+  color: var(--muted);
+}
 
 /* Vidéo : largeur 100% + ratio 16:9 garanti */
 video {
   width: 100%;
   aspect-ratio: 16 / 9;
-  height: auto;            /* respecte le ratio */
+  height: auto;
+  /* respecte le ratio */
   border-radius: 8px;
   background: #000;
 }
 
 /* Table */
-table { width: 100%; border-collapse: collapse; }
-th, td { padding: 8px; border-bottom: 1px solid var(--border); }
-tbody tr:nth-child(odd) { background: var(--table-alt); }
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+tbody tr:nth-child(odd) {
+  background: var(--table-alt);
+}
+
 td input {
-  width: 120px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border);
-  background: var(--input-bg); color: var(--input-fg);
+  width: 120px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+  color: var(--input-fg);
 }
 
 /* Séparateur interne de la box droite */
-.sep { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+.sep {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 16px 0;
+}
 
 /* Check + output */
-.check { display: flex; gap: 10px; align-items: center; margin: 8px 0 16px; }
+.check {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 8px 0 16px;
+}
+
 .output {
-  white-space: pre-wrap; background: var(--input-bg); color: var(--input-fg);
-  border:1px solid var(--border); border-radius:8px; padding:12px; margin-top:10px;
+  white-space: pre-wrap;
+  background: var(--input-bg);
+  color: var(--input-fg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 10px;
 }
 
 /* === Layout plein écran à pourcentages === */
 .layout {
-  width: 96vw;              /* quasi plein écran */
+  width: 96vw;
+  /* quasi plein écran */
   margin: 0 auto;
   padding: 12px 24px;
   display: grid;
   grid-template-columns: minmax(0, var(--left-col)) minmax(320px, var(--right-col));
   gap: var(--gap);
-  align-items: stretch;      /* colonnes pleine hauteur */
+  align-items: stretch;
+  /* colonnes pleine hauteur */
 }
-.layout section { padding: 0; max-width: none; }
+
+.layout section {
+  padding: 0;
+  max-width: none;
+}
 
 /* Colonne vidéo : la carte occupe toute la hauteur, vidéo en haut, contrôles en bas */
 .player .card {
@@ -121,26 +213,34 @@ td input {
   display: flex;
   flex-direction: column;
 }
+
 .player .controls {
   margin-top: 12px;
 }
 
 /* Colonne de droite (panel) = carte pleine hauteur, découpée en 3 blocs égaux */
-.rightpanel { height: 100%; }
+.rightpanel {
+  height: 100%;
+}
+
 .rightpanel .card {
   height: 100%;
   display: grid;
-  grid-template-rows: 1fr 1fr 1fr;  /* 3 zones égales */
+  grid-template-rows: 1fr 1fr 1fr;
+  /* 3 zones égales */
   gap: 16px;
-  overflow: hidden;                 /* évite le débordement visuel */
+  overflow: hidden;
+  /* évite le débordement visuel */
 }
 
 /* Chaque bloc (= wrapper à ajouter autour des 3 sections) est centré verticalement */
 .rp-block {
   display: flex;
   flex-direction: column;
-  justify-content: center;   /* centrage vertical du contenu */
-  min-height: 0;             /* utile si des éléments scrollables apparaissent */
+  justify-content: center;
+  /* centrage vertical du contenu */
+  min-height: 0;
+  /* utile si des éléments scrollables apparaissent */
 }
 
 /* Les tableaux / outputs dans un bloc peuvent scroller si ça déborde */
@@ -152,29 +252,66 @@ td input {
 
 /* Modal explorateur */
 .browser {
-  position: fixed; inset: 40px; background: var(--bg);
-  border:1px solid var(--border); border-radius:12px;
-  display:flex; flex-direction:column; box-shadow: 0 10px 40px var(--overlay);
+  position: fixed;
+  inset: 40px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px var(--overlay);
 }
-.browser.hidden { display:none; }
+
+.browser.hidden {
+  display: none;
+}
+
 .browser-head {
-  display:flex; justify-content:space-between; align-items:center;
-  padding:10px 12px; border-bottom:1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
   background: color-mix(in oklab, var(--card), var(--fg) 6%);
 }
-.browser-path { padding:10px 12px; color:var(--muted); border-bottom:1px solid var(--border); }
+
+.browser-path {
+  padding: 10px 12px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+
 .entries {
-  padding:8px 12px; overflow:auto; flex:1;
-  display:grid; grid-template-columns: repeat(auto-fill,minmax(260px,1fr)); gap:8px;
+  padding: 8px 12px;
+  overflow: auto;
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 8px;
 }
+
 .entry {
-  border:1px solid var(--border); border-radius:8px; padding:10px;
-  background: color-mix(in oklab, var(--card), var(--fg) 4%); cursor:pointer;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  background: color-mix(in oklab, var(--card), var(--fg) 4%);
+  cursor: pointer;
 }
-.entry:hover { border-color: var(--accent); }
-.entry .type { font-size:12px; color:var(--muted); }
+
+.entry:hover {
+  border-color: var(--accent);
+}
+
+.entry .type {
+  font-size: 12px;
+  color: var(--muted);
+}
 
 /* Fallback mobile/étroit : on empile les colonnes */
 @media (max-width: 1100px) {
-  .layout { grid-template-columns: 1fr; width: 100vw; padding: 12px; }
+  .layout {
+    grid-template-columns: 1fr;
+    width: 100vw;
+    padding: 12px;
+  }
 }
