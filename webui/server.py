@@ -4,20 +4,17 @@
 import os
 import sys
 import json
-import stat as pystat
 import subprocess
 from datetime import datetime, timezone
-from urllib.parse import unquote
 from concurrent.futures import ThreadPoolExecutor, as_completed
-
-from flask import Flask, request, send_from_directory, jsonify, Response
+from mimetypes import guess_type
+from flask import Flask, request, send_from_directory, jsonify, Response, send_file
 
 # === Config ===
 PORT = int(os.environ.get("QUICKCUT_PORT", "5050"))
 MAX_WORKERS = os.cpu_count() or 4
 APP = Flask(__name__, static_folder="static", static_url_path="/static")
 
-# Extensions considérées "vidéo"
 VIDEO_EXTS = {".mp4", ".mov", ".m4v"}
 
 def is_mac() -> bool:
@@ -27,20 +24,16 @@ def has_cmd(cmd: str) -> bool:
     return subprocess.call(["/usr/bin/env", "bash", "-lc", f"command -v {cmd} >/dev/null 2>&1"]) == 0
 
 def fmt_for_setfile(epoch: int) -> str:
-    # "MM/DD/YYYY HH:MM:SS" en localtime pour SetFile
     return datetime.fromtimestamp(epoch).strftime("%m/%d/%Y %H:%M:%S")
 
 def fmt_for_touch(epoch: int) -> str:
-    # "YYYYmmddHHMM.SS" en localtime pour touch -t
     return datetime.fromtimestamp(epoch).strftime("%Y%m%d%H%M.%S")
 
 def fmt_iso_utc(epoch: int) -> str:
-    # MP4 metadata creation_time (UTC)
     return datetime.fromtimestamp(epoch, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 def birth_mtime(path: str) -> tuple[int, int]:
     st = os.stat(path)
-    # macOS: st_birthtime, sinon fallback
     birth = getattr(st, "st_birthtime", 0) or int(st.st_mtime)
     mod = int(st.st_mtime)
     return int(birth), int(mod)
@@ -53,7 +46,6 @@ def ensure_dir(p: str):
     os.makedirs(p, exist_ok=True)
 
 def parse_timecode(tc: str) -> int:
-    # "SS" | "MM:SS" | "HH:MM:SS"
     parts = tc.strip().split(":")
     if len(parts) == 1:
         return int(parts[0])
@@ -67,13 +59,11 @@ def safe_time_for_name(tc: str) -> str:
     return tc.replace(":", "-")
 
 def run_ffmpeg_segment(input_path: str, start: str, end: str, out_path: str, creation_epoch: int):
-    # Calcule dates pour ce segment
     ssec = parse_timecode(start)
     esec = parse_timecode(end)
     crt_epoch = creation_epoch + ssec
     mod_epoch = max(creation_epoch + esec, crt_epoch)
 
-    # Ajout metadata MP4 creation_time (UTC) et copie sans réencodage
     ct_iso = fmt_iso_utc(crt_epoch)
     cmd = [
         "ffmpeg", "-nostdin", "-hide_banner", "-loglevel", "error", "-y",
@@ -83,10 +73,7 @@ def run_ffmpeg_segment(input_path: str, start: str, end: str, out_path: str, cre
     ]
     subprocess.check_call(cmd)
 
-    # MAJ dates Finder
-    # mtime
     subprocess.call(["touch", "-t", fmt_for_touch(mod_epoch), out_path])
-    # création (si SetFile dispo)
     if is_mac() and has_cmd("SetFile"):
         subprocess.call(["SetFile", "-d", fmt_for_setfile(crt_epoch), out_path])
 
@@ -103,72 +90,69 @@ def run_ffmpeg_segment(input_path: str, start: str, end: str, out_path: str, cre
 def index():
     return send_from_directory(APP.static_folder, "index.html")
 
-@APP.route("/api/list")
-def api_list():
-    """Liste les dossiers/fichiers pour construire un petit explorateur.
-       Param: ?path=/absolute/path
-       Si non fourni: propose quelques racines utiles.
-    """
+# --- NOUVEAU : boîte de dialogue Finder native (macOS) ---
+@APP.route("/api/choose-file")
+def api_choose_file():
+    if not is_mac():
+        return jsonify({"ok": False, "error": "macOS uniquement pour cette action."}), 400
+    script = r'''
+        set t to {"public.movie","public.mpeg-4","com.apple.quicktime-movie"}
+        set f to choose file with prompt "Sélectionnez une vidéo" of type t
+        POSIX path of f
+    '''
+    try:
+        out = subprocess.check_output(["osascript", "-e", script], text=True).strip()
+        return jsonify({"ok": True, "path": out})
+    except subprocess.CalledProcessError:
+        # utilisateur a cliqué sur Annuler
+        return jsonify({"ok": False, "canceled": True})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+# --- NOUVEAU : streaming local avec support Range pour la prévisualisation ---
+@APP.route("/api/stream")
+def api_stream():
     path = request.args.get("path", "")
-    items = []
-    if not path:
-        roots = []
-        home = os.path.expanduser("~")
-        for candidate in [os.path.join(home, "Vidéos"), os.path.join(home, "Videos"), "/Volumes", home, "/"]:
-            if os.path.exists(candidate):
-                roots.append(candidate)
-        return jsonify({"cwd": None, "items": [{"name": r, "path": r, "type": "dir"} for r in roots]})
+    if not path or not os.path.isfile(path):
+        return "Not found", 404
 
-    path = unquote(path)
-    if not os.path.exists(path):
-        return jsonify({"cwd": path, "items": [], "error": "Path not found"}), 404
+    mime = guess_type(path)[0] or "application/octet-stream"
+    file_size = os.path.getsize(path)
+    range_header = request.headers.get("Range", None)
 
-    # Parent
-    parent = os.path.dirname(path) if path != "/" else None
-    if os.path.isdir(path):
-        try:
-            for name in sorted(os.listdir(path)):
-                if name.startswith("."):
-                    continue
-                p = os.path.join(path, name)
-                try:
-                    st = os.stat(p)
-                    if os.path.isdir(p):
-                        items.append({"name": name, "path": p, "type": "dir"})
-                    else:
-                        ext = os.path.splitext(name)[1].lower()
-                        if ext in VIDEO_EXTS:
-                            items.append({
-                                "name": name, "path": p, "type": "file",
-                                "size": st.st_size
-                            })
-                except Exception:
-                    continue
-        except PermissionError:
-            return jsonify({"cwd": path, "items": [], "error": "Permission denied"}), 403
-        return jsonify({"cwd": path, "parent": parent, "items": items})
-    else:
-        # Si c'est un fichier, renvoyer ses méta
-        st = os.stat(path)
-        return jsonify({
-            "cwd": os.path.dirname(path),
-            "file": {
-                "name": os.path.basename(path),
-                "path": path,
-                "size": st.st_size,
-                "type": "file",
-            }
-        })
+    if not range_header:
+        # Réponse complète
+        resp = send_file(path, mimetype=mime, conditional=True)
+        resp.headers["Accept-Ranges"] = "bytes"
+        return resp
+
+    # Ex: "bytes=0-1023"
+    try:
+        bytes_unit, rng = range_header.split("=")
+        start_s, end_s = (rng.split("-") + [""])[:2]
+        start = int(start_s) if start_s else 0
+        end = int(end_s) if end_s else file_size - 1
+        end = min(end, file_size - 1)
+        start = max(0, start)
+        if start > end:
+            start = 0
+        length = end - start + 1
+        with open(path, "rb") as f:
+            f.seek(start)
+            data = f.read(length)
+        rv = Response(data, 206, mimetype=mime, direct_passthrough=True)
+        rv.headers.add("Content-Range", f"bytes {start}-{end}/{file_size}")
+        rv.headers.add("Accept-Ranges", "bytes")
+        rv.headers.add("Content-Length", str(length))
+        return rv
+    except Exception:
+        # fallback : envoie complet
+        resp = send_file(path, mimetype=mime, conditional=True)
+        resp.headers["Accept-Ranges"] = "bytes"
+        return resp
 
 @APP.route("/api/cut", methods=["POST"])
 def api_cut():
-    """Payload JSON:
-    {
-      "path": "/abs/path/to/video.mp4",
-      "segments": [{"start":"MM:SS","end":"MM:SS"}, ...],
-      "trashOriginal": true/false
-    }
-    """
     data = request.get_json(force=True)
     src = data.get("path", "")
     segments = data.get("segments", [])
@@ -179,7 +163,6 @@ def api_cut():
     if not segments:
         return jsonify({"ok": False, "error": "No segments"}), 400
 
-    # Dates de base
     birth_epoch, _ = birth_mtime(src)
     stem = stem_from_path(src)
     basedir = os.path.dirname(src)
@@ -188,7 +171,6 @@ def api_cut():
     if len(segments) > 1:
         ensure_dir(outdir)
 
-    # Prépare tâches
     futures = []
     results = []
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as exe:
@@ -212,7 +194,6 @@ def api_cut():
             except Exception as e:
                 results.append({"ok": False, "error": str(e)})
 
-    # Mise à la corbeille ?
     if trash and all(r.get("ok") for r in results):
         try:
             from send2trash import send2trash
@@ -241,10 +222,8 @@ def api_reveal():
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
 
-# Fichiers statiques
 @APP.route("/<path:path>")
 def static_proxy(path):
-    # sert tout ce qui est dans /static
     return send_from_directory(APP.static_folder, path)
 
 if __name__ == "__main__":

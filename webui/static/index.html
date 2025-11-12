@@ -17,7 +17,6 @@
         </p>
     </header>
 
-    <!-- Layout 2 colonnes : gauche (vidéo large), droite (tout le reste dans UNE box) -->
     <div class="layout">
         <section class="player">
             <div class="card">
@@ -35,26 +34,12 @@
             <div class="card">
 
                 <div class="rp-block">
-                    <!-- 1) Sélection du fichier -->
+                    <!-- 1) Sélection du fichier (fusionnée) -->
                     <h2>1) Sélection du fichier</h2>
                     <div class="row">
-                        <label>Prévisualisation locale (facultative) :</label>
-                        <input type="file" id="fileLocal" accept="video/*" />
-                    </div>
-
-                    <div class="row">
-                        <label>Chemin absolu pour découpe (vrai fichier disque) :</label>
+                        <label>Chemin absolu :</label>
                         <input type="text" id="absPath" placeholder="/Volumes/NO NAME/DCIM/113GOPRO/GOPR1649.MP4" />
                         <button id="browseBtn">Parcourir…</button>
-                    </div>
-
-                    <div id="browser" class="browser hidden">
-                        <div class="browser-head">
-                            <strong>Explorateur</strong>
-                            <button id="browserClose">Fermer</button>
-                        </div>
-                        <div class="browser-path"><span id="cwdLabel"></span></div>
-                        <div id="entries" class="entries"></div>
                     </div>
                 </div>
 

@@ -22,20 +22,31 @@ let IN = null, OUT = null;
 let segments = [];
 
 const player = $("#player");
-const fileLocal = $("#fileLocal");
 const absPath = $("#absPath");
 const inOutDisplay = $("#inOutDisplay");
 const tbody = $("#segmentsTable tbody");
 const output = $("#cutOutput");
 const trashOriginal = $("#trashOriginal");
 
-// ==== File preview (no upload) ====
-fileLocal.addEventListener("change", () => {
-  const f = fileLocal.files[0];
-  if (!f) return;
-  const url = URL.createObjectURL(f);
-  player.src = url;
-  player.play().catch(() => { });
+// ==== Finder natif (AppleScript côté serveur) + prévisualisation via /api/stream ====
+$("#browseBtn").addEventListener("click", async () => {
+  try {
+    const resp = await fetch("/api/choose-file");
+    const data = await resp.json();
+    if (!data.ok) {
+      if (data.canceled) return; // utilisateur a annulé
+      alert(data.error || "Impossible d’ouvrir la boîte de dialogue.");
+      return;
+    }
+    const path = data.path;
+    absPath.value = path;
+
+    // Prévisualisation via streaming local (support Range)
+    player.src = `/api/stream?path=${encodeURIComponent(path)}`;
+    player.play().catch(() => { });
+  } catch (e) {
+    alert("Erreur lors de l’ouverture du Finder.");
+  }
 });
 
 // ==== Markers & controls ====
@@ -93,55 +104,11 @@ tbody.addEventListener("click", (e) => {
   renderSegments();
 });
 
-// ==== Explorer (backend) ====
-const browser = $("#browser");
-const entries = $("#entries");
-const cwdLabel = $("#cwdLabel");
-$("#browseBtn").addEventListener("click", () => {
-  browser.classList.remove("hidden");
-  loadList("");
-});
-$("#browserClose").addEventListener("click", () => browser.classList.add("hidden"));
-
-async function loadList(path) {
-  const resp = await fetch(`/api/list${path ? `?path=${encodeURIComponent(path)}` : ""}`);
-  const data = await resp.json();
-  entries.innerHTML = "";
-  if (data.error) {
-    entries.textContent = data.error;
-    return;
-  }
-  cwdLabel.textContent = data.cwd || "(Racines)";
-  if (data.parent) {
-    const up = document.createElement("div");
-    up.className = "entry";
-    up.innerHTML = `<div><strong>⬆️ Dossier parent</strong></div><div class="type">${data.parent}</div>`;
-    up.onclick = () => loadList(data.parent);
-    entries.appendChild(up);
-  }
-  (data.items || []).forEach(it => {
-    const div = document.createElement("div");
-    div.className = "entry";
-    if (it.type === "dir") {
-      div.innerHTML = `<div><strong>📁 ${it.name}</strong></div><div class="type">${it.path}</div>`;
-      div.onclick = () => loadList(it.path);
-    } else {
-      div.innerHTML = `<div><strong>🎞️ ${it.name}</strong></div><div class="type">${it.path}</div>`;
-      div.onclick = () => {
-        absPath.value = it.path;
-        browser.classList.add("hidden");
-      };
-    }
-    entries.appendChild(div);
-  });
-}
-
 // ==== Lancer la découpe ====
 $("#cutButton").addEventListener("click", async () => {
   const path = absPath.value.trim();
-  if (!path) { alert("Renseigne le chemin absolu du fichier à découper."); return; }
+  if (!path) { alert("Renseigne (ou choisis) le chemin absolu du fichier à découper."); return; }
   if (segments.length === 0) { alert("Ajoute au moins un segment."); return; }
-  // validation rapide
   for (const s of segments) {
     if (isNaN(parseTime(s.start)) || isNaN(parseTime(s.end)) || parseTime(s.end) <= parseTime(s.start)) {
       alert(`Segment invalide: ${s.start} -> ${s.end}`);
@@ -171,8 +138,7 @@ $("#cutButton").addEventListener("click", async () => {
   if (data.trashedOriginal) txt += `\n🗑️ Original envoyé à la corbeille.\n`;
   output.textContent = txt;
 
-  // Liens "Révéler dans Finder"
-  // Ajouter boutons dynamiquement
+  // Boutons "Révéler dans le Finder"
   const lines = data.results.filter(r => r.ok).map(r => r.output);
   if (lines.length) {
     const frag = document.createDocumentFragment();
